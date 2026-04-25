@@ -253,7 +253,6 @@
     letter-spacing: 1px;
   }
 
-  /* Slot cells */
   .slot-cell {
     border-right: 1px solid var(--border);
     height: 84px;
@@ -262,10 +261,21 @@
   }
   .slot-cell:last-child { border-right: none; }
 
-  .cell-inner {
+  .cell-flex {
     height: 100%;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid transparent;
+    transition: border-color 0.12s, background 0.12s;
+  }
+
+  .cell-flex:hover { border-color: #999; background: rgba(0,0,0,0.018); }
+  .cell-flex.filled { background: #f0f0f0; border-color: #bbb; }
+
+  .cell-inner {
+    width: 100%;
     padding: 6px 8px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
@@ -273,15 +283,12 @@
     color: var(--black);
     outline: none;
     background: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     text-align: center;
     cursor: text;
     line-height: 1.5;
     word-break: break-word;
     overflow: hidden;
-    transition: border-color 0.12s, background 0.12s;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
@@ -295,17 +302,8 @@
     pointer-events: none;
   }
 
-  .cell-inner:hover { border-color: #999; background: rgba(0,0,0,0.018); }
-
-  .cell-inner:focus {
-    border: 2px solid var(--black);
-    background: rgba(0,0,0,0.03);
-  }
-
-  .cell-inner.filled {
-    background: #f7f7f7;
-    border-color: #bbb;
-  }
+  .cell-inner:focus { outline: none; }
+  .cell-flex:focus-within { border: 2px solid var(--black); background: rgba(0,0,0,0.03); }
 
   /* ── ACTIONS ── */
   .actions {
@@ -480,7 +478,13 @@ TIME_SLOTS.forEach((slot, rowIdx) => {
     inner.dataset.col = colIdx;
     inner.dataset.placeholder = '+ ADD';
 
-    inner.addEventListener('input', () => { updateFilled(inner); updateCredits(); });
+    inner.addEventListener('input', () => {
+      // Browsers leave a <br> behind when all text is deleted — clear it
+      if (inner.innerHTML === '<br>' || inner.innerHTML === '<br/>' || inner.innerHTML === '<div><br></div>') {
+        inner.innerHTML = '';
+      }
+      updateFilled(inner); updateCredits();
+    });
     inner.addEventListener('keydown', (e) => {
       if (e.key === 'Tab') {
         e.preventDefault();
@@ -494,18 +498,22 @@ TIME_SLOTS.forEach((slot, rowIdx) => {
         document.querySelector(`[data-row="${nr}"][data-col="${colIdx}"]`)?.focus();
       }
     });
-    td.appendChild(inner);
+    const flexWrap = document.createElement('div');
+    flexWrap.className = 'cell-flex';
+    flexWrap.appendChild(inner);
+    td.appendChild(flexWrap);
     tr.appendChild(td);
   });
   tbody.appendChild(tr);
 });
 
 function updateFilled(el) {
-  el.textContent.trim() ? el.classList.add('filled') : el.classList.remove('filled');
+  const wrap = el.closest('.cell-flex');
+  el.textContent.trim() ? wrap.classList.add('filled') : wrap.classList.remove('filled');
 }
 function updateCredits() {
   document.getElementById('credit-count').textContent =
-    document.querySelectorAll('.cell-inner.filled').length;
+    document.querySelectorAll('.cell-flex.filled').length;
 }
 function saveData() {
   const data = {};
@@ -530,7 +538,7 @@ function clearAll() {
   if (!confirm('Clear all cells?')) return;
   document.querySelectorAll('.cell-inner').forEach(el => {
     el.textContent = '';
-    el.classList.remove('filled');
+    el.closest('.cell-flex').classList.remove('filled');
   });
   updateCredits();
   showToast('All cleared');
