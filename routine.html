@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Routine</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #ffffff;
+    --gray: #888;
+    --light: #f4f4f4;
+    --border: #d0d0d0;
+    --grid-color: rgba(0,0,0,0.055);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--white);
+    color: var(--black);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    overflow-x: auto;
+    background-image:
+      linear-gradient(var(--grid-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 56px;
+    background: var(--white);
+    border-bottom: 2px solid var(--black);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-brand {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+  }
+
+  .nav-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--gray);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    text-transform: uppercase;
+  }
+
+  /* ── WRAPPER ── */
+  .wrapper {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 52px 40px 72px;
+  }
+
+  /* ── HEADER ── */
+  .header { margin-bottom: 36px; }
+
+  .terminal-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--black);
+    color: var(--white);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    padding: 5px 12px;
+    margin-bottom: 16px;
+  }
+
+  .terminal-tag::before { content: '>_ '; color: #aaa; }
+
+  .header-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(52px, 9vw, 96px);
+    font-weight: 900;
+    line-height: 0.88;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+  }
+
+  .header-title .line1 { color: var(--black); display: block; }
+  .header-title .line2 {
+    color: transparent;
+    -webkit-text-stroke: 2px #bbb;
+    display: block;
+  }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 24px;
+    border: 1px solid var(--black);
+    width: fit-content;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 24px;
+    border-right: 1px solid var(--black);
+  }
+
+  .meta-item:last-child { border-right: none; }
+
+  .meta-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 600;
+    color: var(--gray);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .meta-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: var(--black);
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  /* ── TABLE ── */
+  .table-section {
+    border: 2px solid var(--black);
+    background: var(--white);
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 920px;
+    table-layout: fixed;
+  }
+  col.time-col { width: 240px; }
+  col.day-col  { width: calc((100% - 240px) / 7); }
+
+  thead tr { border-bottom: 2px solid var(--black); }
+
+  th {
+    padding: 12px 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--black);
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+
+  th:first-child {
+    text-align: left;
+    padding-left: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 600;
+    color: var(--gray);
+    letter-spacing: 2px;
+    min-width: 240px;
+    background: var(--light);
+    border-right: 2px solid var(--black);
+  }
+
+  th:last-child { border-right: none; }
+
+  th .day-code {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7px;
+    font-weight: 400;
+    color: var(--gray);
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+
+  /* ── BODY ROWS ── */
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) { background: rgba(0,0,0,0.013); }
+  tbody tr:hover { background: rgba(0,0,0,0.025); }
+
+  /* Time cell */
+  .time-cell {
+    padding: 0 14px 0 18px;
+    height: 84px;
+    vertical-align: middle;
+    border-right: 2px solid var(--black);
+    background: var(--light);
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .time-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .time-start, .time-end {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: var(--black);
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .time-sep {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #bbb;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .row-code {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7px;
+    color: #ccc;
+    letter-spacing: 1px;
+  }
+
+  /* Slot cells */
+  .slot-cell {
+    border-right: 1px solid var(--border);
+    height: 84px;
+    vertical-align: middle;
+    padding: 5px;
+  }
+  .slot-cell:last-child { border-right: none; }
+
+  .cell-inner {
+    height: 100%;
+    width: 100%;
+    border: 1px solid transparent;
+    padding: 6px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--black);
+    outline: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: text;
+    line-height: 1.5;
+    word-break: break-word;
+    overflow: hidden;
+    transition: border-color 0.12s, background 0.12s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .cell-inner:empty::before {
+    content: attr(data-placeholder);
+    color: #ccc;
+    font-size: 8px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    pointer-events: none;
+  }
+
+  .cell-inner:hover { border-color: #999; background: rgba(0,0,0,0.018); }
+
+  .cell-inner:focus {
+    border: 2px solid var(--black);
+    background: rgba(0,0,0,0.03);
+  }
+
+  .cell-inner.filled {
+    background: #f7f7f7;
+    border-color: #bbb;
+  }
+
+  /* ── ACTIONS ── */
+  .actions {
+    display: flex;
+    gap: 0;
+    margin-top: 20px;
+    border: 2px solid var(--black);
+    width: fit-content;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 13px 22px;
+    border: none;
+    border-right: 1px solid var(--black);
+    cursor: pointer;
+    background: var(--white);
+    color: var(--black);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: background 0.12s, color 0.12s;
+  }
+
+  .btn:last-child { border-right: none; }
+  .btn:hover { background: var(--black); color: var(--white); }
+
+  .btn-primary { background: var(--black); color: var(--white); }
+  .btn-primary:hover { background: #333; }
+
+  .hint {
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: #aaa;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .hint::before { content: '// '; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--black);
+    color: var(--white);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 12px 28px;
+    z-index: 9999;
+    transition: transform 0.32s cubic-bezier(.175,.885,.32,1.2), opacity 0.32s;
+    opacity: 0;
+    pointer-events: none;
+    text-transform: uppercase;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<nav>
+  <div class="nav-brand">Weekly Routine</div>
+  <div class="nav-tag">Academic_Schedule</div>
+</nav>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="terminal-tag">SCHEDULE_BUILDER</div>
+    <h1 class="header-title">
+      <span class="line1">Weekly</span>
+      <span class="line2">Routine</span>
+    </h1>
+    <div class="header-meta">
+      <div class="meta-item">
+        <span class="meta-label">Slots_Filled</span>
+        <span class="meta-value"><span id="credit-count">0</span> / 49</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Days</span>
+        <span class="meta-value">07</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Periods</span>
+        <span class="meta-value">07</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-section">
+    <table id="routine-table">
+      <colgroup>
+        <col class="time-col">
+        <col class="day-col"><col class="day-col"><col class="day-col">
+        <col class="day-col"><col class="day-col"><col class="day-col"><col class="day-col">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Time / Day</th>
+          <th><span class="day-code">D_01</span>Sunday</th>
+          <th><span class="day-code">D_02</span>Monday</th>
+          <th><span class="day-code">D_03</span>Tuesday</th>
+          <th><span class="day-code">D_04</span>Wednesday</th>
+          <th><span class="day-code">D_05</span>Thursday</th>
+          <th><span class="day-code">D_06</span>Friday</th>
+          <th><span class="day-code">D_07</span>Saturday</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn btn-primary" onclick="downloadPNG()">⬇ Export_PNG</button>
+    <button class="btn" onclick="saveData()">◆ Save_Data</button>
+    <button class="btn" onclick="loadData()">◈ Load_Saved</button>
+    <button class="btn" onclick="clearAll()">✕ Clear_All</button>
+  </div>
+  <div class="hint">click any cell to type — tab moves right, enter moves down</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const TIME_SLOTS = [
+  { start: '08:00 AM', end: '09:20 AM', code: 'P_01' },
+  { start: '09:30 AM', end: '10:50 AM', code: 'P_02' },
+  { start: '11:00 AM', end: '12:20 PM', code: 'P_03' },
+  { start: '12:30 PM', end: '01:50 PM', code: 'P_04' },
+  { start: '02:00 PM', end: '03:20 PM', code: 'P_05' },
+  { start: '03:30 PM', end: '04:50 PM', code: 'P_06' },
+  { start: '05:00 PM', end: '06:20 PM', code: 'P_07' },
+];
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const tbody = document.getElementById('table-body');
+
+TIME_SLOTS.forEach((slot, rowIdx) => {
+  const tr = document.createElement('tr');
+
+  const timeTd = document.createElement('td');
+  timeTd.className = 'time-cell';
+  timeTd.innerHTML = `
+    <span class="row-code">${slot.code}</span>
+    <div class="time-wrap">
+      <span class="time-start">${slot.start}</span>
+      <span class="time-sep">—</span>
+      <span class="time-end">${slot.end}</span>
+    </div>`;
+  tr.appendChild(timeTd);
+
+  DAYS.forEach((day, colIdx) => {
+    const td = document.createElement('td');
+    td.className = 'slot-cell';
+    const inner = document.createElement('div');
+    inner.className = 'cell-inner';
+    inner.contentEditable = 'true';
+    inner.spellcheck = false;
+    inner.dataset.row = rowIdx;
+    inner.dataset.col = colIdx;
+    inner.dataset.placeholder = '+ ADD';
+
+    inner.addEventListener('input', () => { updateFilled(inner); updateCredits(); });
+    inner.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const nc = colIdx + 1 >= DAYS.length ? 0 : colIdx + 1;
+        const nr = colIdx + 1 >= DAYS.length ? (rowIdx + 1 >= TIME_SLOTS.length ? 0 : rowIdx + 1) : rowIdx;
+        document.querySelector(`[data-row="${nr}"][data-col="${nc}"]`)?.focus();
+      }
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const nr = rowIdx + 1 >= TIME_SLOTS.length ? 0 : rowIdx + 1;
+        document.querySelector(`[data-row="${nr}"][data-col="${colIdx}"]`)?.focus();
+      }
+    });
+    td.appendChild(inner);
+    tr.appendChild(td);
+  });
+  tbody.appendChild(tr);
+});
+
+function updateFilled(el) {
+  el.textContent.trim() ? el.classList.add('filled') : el.classList.remove('filled');
+}
+function updateCredits() {
+  document.getElementById('credit-count').textContent =
+    document.querySelectorAll('.cell-inner.filled').length;
+}
+function saveData() {
+  const data = {};
+  document.querySelectorAll('.cell-inner').forEach(el => {
+    data[`${el.dataset.row}-${el.dataset.col}`] = el.textContent.trim();
+  });
+  localStorage.setItem('routine_v2', JSON.stringify(data));
+  showToast('Data saved ✓');
+}
+function loadData() {
+  const raw = localStorage.getItem('routine_v2');
+  if (!raw) { showToast('No saved data found'); return; }
+  const data = JSON.parse(raw);
+  document.querySelectorAll('.cell-inner').forEach(el => {
+    el.textContent = data[`${el.dataset.row}-${el.dataset.col}`] || '';
+    updateFilled(el);
+  });
+  updateCredits();
+  showToast('Data loaded ✓');
+}
+function clearAll() {
+  if (!confirm('Clear all cells?')) return;
+  document.querySelectorAll('.cell-inner').forEach(el => {
+    el.textContent = '';
+    el.classList.remove('filled');
+  });
+  updateCredits();
+  showToast('All cleared');
+}
+async function downloadPNG() {
+  showToast('Rendering...');
+  if (document.activeElement) document.activeElement.blur();
+  await new Promise(r => setTimeout(r, 80));
+
+  // Temporarily boost border visibility for clean export
+  const style = document.createElement('style');
+  style.id = 'export-style';
+  style.textContent = `
+    .table-section, table, th, td, .time-cell, .slot-cell, .cell-inner.filled {
+      border-color: #999 !important;
+    }
+    thead tr { border-bottom-color: #000 !important; }
+    th:first-child, .time-cell { border-right-color: #000 !important; }
+    .table-section { border-color: #000 !important; }
+    tbody tr { border-bottom-color: #bbb !important; }
+  `;
+  document.head.appendChild(style);
+  await new Promise(r => setTimeout(r, 40));
+
+  const target = document.querySelector('.table-section');
+  const canvas = await html2canvas(target, {
+    backgroundColor: '#ffffff',
+    scale: 3,
+    useCORS: true,
+    logging: false,
+    x: 0, y: 0,
+  });
+
+  document.getElementById('export-style').remove();
+
+  const a = document.createElement('a');
+  a.download = 'weekly_routine.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  showToast('PNG downloaded ✓');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+loadData();
+</script>
+</body>
+</html>
